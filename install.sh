@@ -3,10 +3,12 @@
 ZSHRC_FILE="${HOME}/.zshrc"
 ZSH_PLUGINS_DIR="${HOME}/.oh-my-zsh/plugins"
 ZSH_PLUGINS=(
-    kubectl
-    kube-aliases
-    kubectl-autocomplete
+  kubectl
+  kube-aliases
+  kubectl-autocomplete
 )
+
+TEMP_FILE=$(mktemp)
 
 check_status() {
   if [ $? -eq 0 ]; then
@@ -38,7 +40,7 @@ echo "Checking for required packages..."
 check_packages
 
 echo "Backing up ZSH User file configuration..."
-cp -p "${ZSHRC_FILE}" "${ZSHRC_FILE}.save"
+cp -p "${ZSHRC_FILE}" "${ZSHRC_FILE}.save" 
 
 # kube-aliases
 echo "Applying kube-aliases..."
@@ -65,29 +67,59 @@ kubectl completion zsh > "${ZSH_PLUGINS_DIR}/kubectl-autocomplete/kubectl-autoco
 
 check_status
 
-echo "Appending new ZSH plugins..."
+# Atualizar plugins no .zshrc
+echo "Atualizando plugins no .zshrc..."
 
-# Atualiza a linha de plugins corretamente
-if grep -q "^plugins=(" "$ZSHRC_FILE"; then
-    echo "Atualizando plugins no .zshrc..."
+tmpfile=$(mktemp)
+inside_plugins_block=false
+updated=false
+existing_plugins=()
 
-    current_line=$(grep "^plugins=" "$ZSHRC_FILE")
-    current_plugins=($(echo "$current_line" | sed -E 's/plugins=\((.*)\)/\1/'))
+while IFS= read -r line; do
+  if [[ "$line" =~ ^plugins=\( ]]; then
+    inside_plugins_block=true
+    echo "$line" >> "$tmpfile"
+    continue
+  fi
 
-    for new_plugin in "${ZSH_PLUGINS[@]}"; do
-        if [[ ! " ${current_plugins[@]} " =~ " ${new_plugin} " ]]; then
-            current_plugins+=("${new_plugin}")
+  if $inside_plugins_block; then
+    if [[ "$line" =~ \) ]]; then
+      inside_plugins_block=false
+      for plugin in "${ZSH_PLUGINS[@]}"; do
+        if [[ ! " ${existing_plugins[*]} " =~ " $plugin " ]]; then
+          echo "  $plugin" >> "$tmpfile"
+          updated=true
         fi
-    done
+      done
+      echo "$line" >> "$tmpfile"
+    else
+      plugin_name=$(echo "$line" | xargs)
+      existing_plugins+=("$plugin_name")
+      echo "$line" >> "$tmpfile"
+    fi
+    continue
+  fi
 
-    new_line="plugins=(${current_plugins[*]})"
-    sed -i "s/^plugins=(.*)/${new_line}/" "$ZSHRC_FILE"
+  echo "$line" >> "$tmpfile"
+done < "$ZSHRC_FILE"
+
+# Se não encontrou bloco plugins=(...), adiciona ao final
+if ! grep -q "^plugins=(" "$ZSHRC_FILE"; then
+  echo -e "\nplugins=(" >> "$tmpfile"
+  for plugin in "${ZSH_PLUGINS[@]}"; do
+    echo "  $plugin" >> "$tmpfile"
+  done
+  echo ")" >> "$tmpfile"
+  updated=true
+fi
+
+if $updated; then
+  mv "$tmpfile" "$ZSHRC_FILE"
+  echo "Plugins atualizados em $ZSHRC_FILE"
 else
-    echo "Nenhuma linha de plugins encontrada. Adicionando ao final..."
-    echo "" >> "$ZSHRC_FILE"
-    echo "plugins=(${ZSH_PLUGINS[*]})" >> "$ZSHRC_FILE"
+  rm "$tmpfile"
+  echo "Nenhuma atualização necessária em plugins"
 fi
 
 echo "Kubernetes AddOns applied successfully."
 echo "Please restart your terminal or run 'source ~/.zshrc' to apply changes."
-echo "Enjoy your Kubernetes experience!"
