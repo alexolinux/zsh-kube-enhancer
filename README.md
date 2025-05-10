@@ -34,6 +34,16 @@ If you don't have `kubectl` installed yet, this repository includes a script to 
 ./install-kubectl.sh
 ```
 
+***Note: ***
+
+If you need a specific `kubectl` version, change the following line in `install-kubectl.sh`:
+
+```shell
+KUBE_VERSION="1.32.0"
+```
+
+`kubectl` Reference version: https://kubernetes.io/releases/
+
 ## 🚀 Recommended Tools
 
 For the best Kubernetes terminal experience, I strongly recommend installing the following tools:
