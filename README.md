@@ -65,6 +65,13 @@ echo 'export PATH=$PATH:$HOME/.kubectx' >> ~/.zshrc
 source ~/.zshrc
 ```
 
+## References
+
+* [kubectl](https://kubernetes.io/docs/reference/kubectl/)
+* [OhMyZsh! Plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins)
+* [fzf](https://github.com/junegunn/fzf)
+* [kubectx](https://github.com/ahmetb/kubectx)
+
 ## Author: Alex Mendes
 
 <https://www.linkedin.com/in/mendesalex>
