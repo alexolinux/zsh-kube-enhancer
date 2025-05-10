@@ -36,6 +36,9 @@ For the best Kubernetes terminal experience, I strongly recommend installing the
 A powerful fuzzy finder used in combination with `kubectx` and `kubens`:
 
 ```shell
+# Rocky/Alma/CentOS Linux (RHEL Based)
+sudo dnf install fzf
+
 # Debian/Ubuntu
 sudo apt install fzf
 
