@@ -76,8 +76,9 @@ source ~/.zshrc
 
 * [kubectl](https://kubernetes.io/docs/reference/kubectl/)
 * [OhMyZsh! Plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins)
-* [fzf](https://github.com/junegunn/fzf)
+* [kubectl-aliases](https://github.com/ahmetb/kubectl-aliases)
 * [kubectx](https://github.com/ahmetb/kubectx)
+* [fzf](https://github.com/junegunn/fzf)
 
 ## Author: Alex Mendes
 
