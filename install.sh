@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ZSHRC_FILE="${HOME}/.zshrc"
+ZSH_PLUGINS_DIR="${HOME}/.oh-my-zsh/plugins"
 ZSH_PLUGINS=(
     kubectl
     kube-aliases
@@ -9,7 +10,6 @@ ZSH_PLUGINS=(
 
 TEMP_FILE=$(mktemp)
 
-# Function to check and print success or error
 check_status() {
   if [ $? -eq 0 ]; then
     echo "Kubernetes Improvements applied in your environment."
@@ -19,40 +19,51 @@ check_status() {
   fi
 }
 
-check_reqs() {
-  is_installed() {
-    if command -v "$1" &> /dev/null; then
-      echo "$1 is installed."
-    else
-      echo "$1 is not installed."
-    fi
-  }
-  is_installed git
-  is_installed zsh
+check_packages() {
+  if ! command -v git >/dev/null 2>&1; then
+    echo "git is not installed. Aborting."
+    return 1
+  fi
+
+  if ! command -v zsh >/dev/null 2>&1; then
+    echo "ZSH is not installed. Aborting."
+    return 1
+  fi
+
+  echo "Both Git and Zsh are installed."
 }
 
-check_status
-
 #-- Main Script
-clear && echo ">> --- Lets Kube! ---<<"
+clear && echo ">> Lets Kube! <<"
 
-echo "Checking requirements..."
-check_reqs
+echo "Checking for required packages..."
+check_packages
 
 echo "Backing up ZSH User file configuration..."
 cp -p "${ZSHRC_FILE}" "${ZSHRC_FILE}.save" 
 
 # kube-aliases
 echo "Applying kube-aliases..."
-git clone https://github.com/Dbz/kube-aliases.git ~/.oh-my-zsh/plugins/kube-aliases
-source ~/.oh-my-zsh/plugins/kube-aliases/kube-aliases.plugin.zsh >/dev/null 2>&1
+
+if [ ! -d "${ZSH_PLUGINS_DIR}/kube-aliases" ]; then
+  echo "Creating kube-aliases directory..."
+  mkdir -p "${ZSH_PLUGINS_DIR}/kube-aliases"
+fi
+
+git clone https://github.com/Dbz/kube-aliases.git "${ZSH_PLUGINS_DIR}/kube-aliases"
+source "${ZSH_PLUGINS_DIR}/kube-aliases/kube-aliases.plugin.zsh" >/dev/null 2>&1
 
 check_status
 
 # kubectl-autocomplete
 echo "Applying kubectl-autocomplete..."
-mkdir -p ~/.oh-my-zsh/plugins/kubectl-autocomplete/
-kubectl completion zsh > ~/.oh-my-zsh/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh >/dev/null 2>&1
+
+if [ ! -d "${ZSH_PLUGINS_DIR}/kubectl-autocomplete" ]; then
+  echo "Creating kubectl-autocomplete directory..."
+  mkdir -p "${ZSH_PLUGINS_DIR}/kubectl-autocomplete"
+fi
+
+kubectl completion zsh > "${ZSH_PLUGINS_DIR}/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh" >/dev/null 2>&1
 
 check_status
 
@@ -83,3 +94,4 @@ done < "$ZSHRC_FILE"
 mv "$TEMP_FILE" "$ZSHRC_FILE"
 
 echo "Kubernetes AddOns applied successfully."
+echo "Please restart your terminal or run 'source ~/.zshrc' to apply changes."
