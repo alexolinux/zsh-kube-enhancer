@@ -8,8 +8,6 @@ ZSH_PLUGINS=(
     kubectl-autocomplete
 )
 
-TEMP_FILE=$(mktemp)
-
 check_status() {
   if [ $? -eq 0 ]; then
     echo "Kubernetes Improvements applied in your environment."
@@ -40,7 +38,7 @@ echo "Checking for required packages..."
 check_packages
 
 echo "Backing up ZSH User file configuration..."
-cp -p "${ZSHRC_FILE}" "${ZSHRC_FILE}.save" 
+cp -p "${ZSHRC_FILE}" "${ZSHRC_FILE}.save"
 
 # kube-aliases
 echo "Applying kube-aliases..."
@@ -69,29 +67,27 @@ check_status
 
 echo "Appending new ZSH plugins..."
 
-# Flag to indicate if we are within the plugins array
-inside_plugins_array=false
+# Atualiza a linha de plugins corretamente
+if grep -q "^plugins=(" "$ZSHRC_FILE"; then
+    echo "Atualizando plugins no .zshrc..."
 
-# Read the zshfile line by line
-while IFS= read -r line; do
-    # Check for the line that contains 'plugins=('
-    if [[ "$line" =~ ^plugins=\( ]]; then
-        inside_plugins_array=true
-        echo "$line" >> "$TEMP_FILE"  # Write the original line to the temp file
-    elif [[ "$line" =~ ^\) && $inside_plugins_array == true ]]; then
-        # Close the plugins array, but first add the new plugins
-        for plugin in "${ZSH_PLUGINS[@]}"; do
-            echo "    $plugin" >> "$TEMP_FILE"
-        done
-        echo "$line" >> "$TEMP_FILE"  # Write the closing parenthesis
-        inside_plugins_array=false
-    else
-        echo "$line" >> "$TEMP_FILE"  # Write all other lines as they are
-    fi
-done < "$ZSHRC_FILE"
+    current_line=$(grep "^plugins=" "$ZSHRC_FILE")
+    current_plugins=($(echo "$current_line" | sed -E 's/plugins=\((.*)\)/\1/'))
 
-# Move the temporary file back to the original zshfile
-mv "$TEMP_FILE" "$ZSHRC_FILE"
+    for new_plugin in "${ZSH_PLUGINS[@]}"; do
+        if [[ ! " ${current_plugins[@]} " =~ " ${new_plugin} " ]]; then
+            current_plugins+=("${new_plugin}")
+        fi
+    done
+
+    new_line="plugins=(${current_plugins[*]})"
+    sed -i "s/^plugins=(.*)/${new_line}/" "$ZSHRC_FILE"
+else
+    echo "Nenhuma linha de plugins encontrada. Adicionando ao final..."
+    echo "" >> "$ZSHRC_FILE"
+    echo "plugins=(${ZSH_PLUGINS[*]})" >> "$ZSHRC_FILE"
+fi
 
 echo "Kubernetes AddOns applied successfully."
 echo "Please restart your terminal or run 'source ~/.zshrc' to apply changes."
+echo "Enjoy your Kubernetes experience!"
