@@ -65,7 +65,7 @@ brew install fzf
 git clone https://github.com/ahmetb/kubectx ~/.kubectx
 ```
 
-#### Add to your shell PATH
+#### Add to your shell PATH (For kubectx & kubens)
 
 ```shell
 echo 'export PATH=$PATH:$HOME/.kubectx' >> ~/.zshrc
