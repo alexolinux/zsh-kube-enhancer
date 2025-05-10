@@ -11,6 +11,13 @@ Enhance your ZSH environment for working with Kubernetes.
   - `kubectl-autocomplete` for shell completion
   - Adds relevant plugins to your `.zshrc`
 
+## 📡 Requirements
+
+- [ZSH Shell](https://www.zsh.org/)
+- [OhMyZsh!](https://ohmyz.sh/)
+
+✴️ *If you need a ZSH Environment, check this repository >> **[zsh-empowered-productivity](https://github.com/alexolinux/zsh-empowered-productivity)***
+
 ## 📦 Installation
 
 ```shell
