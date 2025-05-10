@@ -67,7 +67,6 @@ kubectl completion zsh > "${ZSH_PLUGINS_DIR}/kubectl-autocomplete/kubectl-autoco
 
 check_status
 
-# Atualizar plugins no .zshrc
 echo "Atualizando plugins no .zshrc..."
 
 tmpfile=$(mktemp)
@@ -103,7 +102,6 @@ while IFS= read -r line; do
   echo "$line" >> "$tmpfile"
 done < "$ZSHRC_FILE"
 
-# Se não encontrou bloco plugins=(...), adiciona ao final
 if ! grep -q "^plugins=(" "$ZSHRC_FILE"; then
   echo -e "\nplugins=(" >> "$tmpfile"
   for plugin in "${ZSH_PLUGINS[@]}"; do
