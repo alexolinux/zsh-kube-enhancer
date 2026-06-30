@@ -3,7 +3,7 @@
 # Script to install kubectl binary with curl on Linux
 # List of kubectl releases: https://kubernetes.io/releases/
 # For kubectl latest stable version: $(curl -L -s https://dl.k8s.io/release/stable.txt)
-KUBE_VERSION="1.35.0"
+KUBE_VERSION="1.35.6"
 KUBE_HOME="${HOME}/.local/bin"
 
 # Functions
